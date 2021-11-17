@@ -48,13 +48,13 @@ while isRunning:
     if keys[K_e]:
         rend.camPosition.y += 1 * deltaTime
 
-    #if keys[K_z]:
-    #    face.position.z += 1 * deltaTime
-    #    #face.position.z = -5
+    if keys[K_c]:
+        face.position.z += 1 * deltaTime
+        #face.position.z = -5
 
-    #if keys[K_x]:
-    #    face.position.z -= 1 * deltaTime
-    #    #face.position.z = -5
+    if keys[K_v]:
+        face.position.z -= 1 * deltaTime
+        #face.position.z = -5
 
     if keys[K_LEFT]:
         if rend.valor > 0:
