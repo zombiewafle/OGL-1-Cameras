@@ -35,28 +35,53 @@ void main()
 }
 """
 
-#toonShader = """
-#uniform vec3 lightDir;
-#varying vec3 normal;
-#
-#void main()
-#{
-#	float intensity;
-#	vec4 color;
-#	intensity = dot(lightDir,normalize(normal));
-#
-#	if (intensity > 0.95)
-#		color = vec4(1.0,0.5,0.5,1.0);
-#	else if (intensity > 0.5)
-#		color = vec4(0.6,0.3,0.3,1.0);
-#	else if (intensity > 0.25)
-#		color = vec4(0.4,0.2,0.2,1.0);
-#	else
-#		color = vec4(0.2,0.1,0.1,1.0);
-#	gl_FragColor = color;
-#
-#}
-#"""
+psico_shader = """
+#version 450
+layout(location = 0) out vec4 fragColor;
+in float intensity;
+in vec2 vertexTexcoords;
+in vec3 v3Position;
+in float timer;
+in vec3 fnormal;
+uniform sampler2D tex;
+uniform vec4 diffuse;
+uniform vec4 ambient;
+
+void main()
+{
+	float time = timer*0.5;
+	float bright = floor(mod(v3Position.z, time)*time) +floor(mod(v3Position.y, time)*time);
+	vec4 color = mod(bright, 1.5) > 0.007 ? vec4(0.0, 1.0, 0.0, 1.0) : vec4(1.0, 0.0, 1.0, 1.0);
+  	fragColor = color * intensity;
+}
+"""
+
+toon_shader = """
+#version 450
+layout (location = 0) in vec4 pos;
+layout (location = 1) in vec4 normal;
+layout (location = 2) in vec2 texcoords;
+
+uniform mat4 model;
+uniform mat4 view;
+uniform mat4 projectionMatrix;
+
+uniform vec4 color;
+uniform vec4 light;
+
+out vec4 vertexColor;
+out vec2 vertexTexcoords;
+
+void main()
+{
+    float intensity = dot(model * normal, normalize(light - pos));
+    intensity = intensity > 0.95 ? 1 : (intensity > 0.7 ? 0.7 : (intensity > 0.4 ? 0.4 : (intensity > 0.1 ? 0.1 : 0.05)));
+
+    gl_Position = projectionMatrix * view * model * pos;
+    vertexColor = color * intensity;
+    vertexTexcoords = texcoords;
+}
+"""
 
 
 fragment_shader = """

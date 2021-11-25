@@ -4,6 +4,9 @@ from OpenGL.GL.shaders import compileProgram, compileShader
 from OpenGL.GLU import *
 from pygame import image
 from numpy import array, float32
+import shaders
+
+
 
 import obj
 
@@ -176,6 +179,8 @@ class Renderer(object):
         return glm.inverse(camMatrix)
 
 
+    
+
     def wireframeMode(self):
         glPolygonMode(GL_FRONT_AND_BACK, GL_LINE)
 
@@ -183,16 +188,35 @@ class Renderer(object):
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL)
 
     def toonShader(self):
-        pass
+        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL)
+        glHint(GL_LINE_SMOOTH_HINT, GL_NICEST)
+        glEnable(GL_LINE_SMOOTH)
+
+        glEnable(GL_TEXTURE_1D)
+        #glBindTexture(GL_TEXTURE_1D, )
+
+    def psicoShader(self):
+        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL)
 
 
-    def setShaders(self, vertexShader, fragShader):#, toonShader):
-        if vertexShader is not None and fragShader is not None:
+    def setShaders(self, vertexShader, fragShader):
+        
+        #try:
+        #    self.active_shader = compileProgram(
+        #        compileShader(vertexShader, GL_VERTEX_SHADER),
+        #        compileShader(fragShader, GL_FRAGMENT_SHADER), validate=False)
+
+        #except Exception as e:
+
+        #    print(str(e).encode('utf-8').decode('unicode_escape'))
+        #    raise SystemExit()
+            
+        if vertexShader is not None and fragShader is not None :
             self.active_shader = compileProgram( compileShader(vertexShader, GL_VERTEX_SHADER),
-                                                 compileShader(fragShader, GL_FRAGMENT_SHADER))  
-                                                 #compileShader(toonShader, GL_VERTEX_SHADER))
+                                                 compileShader(fragShader, GL_FRAGMENT_SHADER)) 
         else:
             self.active_shader = None
+        
 
 
     def render(self):
