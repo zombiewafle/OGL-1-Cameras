@@ -1,7 +1,7 @@
 # GLSL
 
 vertex_shader = """
-#version 450
+#version 460
 layout (location = 0) in vec3 position;
 layout (location = 1) in vec3 normal;
 layout (location = 2) in vec2 texCoords;
@@ -35,57 +35,52 @@ void main()
 }
 """
 
-psico_shader = """
-#version 450
-layout(location = 0) out vec4 fragColor;
-in float intensity;
-in vec2 vertexTexcoords;
-in vec3 v3Position;
-in float timer;
-in vec3 fnormal;
-uniform sampler2D tex;
-uniform vec4 diffuse;
-uniform vec4 ambient;
-
+toon_shader_Vertex = """
+#version 330 core
+layout (location = 0) in vec3 position;
+layout (location = 1) in vec3 normal;
+ 
+uniform mat4 modelMatrix;
+uniform mat4 viewMatrix;
+uniform mat4 projectionMatrix;
+uniform mat4 mvpMatrix;
+uniform float time;
+uniform float silhouetteThickness;
+uniform vec3 silhouetteColor;
+ 
+out vec3 fsSilhouetteColor;
+out float fsTime;
+ 
+ 
 void main()
 {
-	float time = timer*0.5;
-	float bright = floor(mod(v3Position.z, time)*time) +floor(mod(v3Position.y, time)*time);
-	vec4 color = mod(bright, 1.5) > 0.007 ? vec4(0.0, 1.0, 0.0, 1.0) : vec4(1.0, 0.0, 1.0, 1.0);
-  	fragColor = color * intensity;
+    vec4 pos = mvpMatrix * vec4(position.xyz + (normal * silhouetteThickness), 1);
+    fsSilhouetteColor = silhouetteColor;
+    fsTime = time;
+    gl_Position = pos;
 }
+
 """
 
-toon_shader = """
-#version 450
-layout (location = 0) in vec4 pos;
-layout (location = 1) in vec4 normal;
-layout (location = 2) in vec2 texcoords;
-
-uniform mat4 model;
-uniform mat4 view;
-uniform mat4 projectionMatrix;
-
-uniform vec4 color;
-uniform vec4 light;
-
-out vec4 vertexColor;
-out vec2 vertexTexcoords;
-
+toon_shader_fragment = """
+#version 330 core
+out vec4 FragColor;
+ 
+in vec3 fsSilhouetteColor;
+in float fsTime;
+ 
 void main()
 {
-    float intensity = dot(model * normal, normalize(light - pos));
-    intensity = intensity > 0.95 ? 1 : (intensity > 0.7 ? 0.7 : (intensity > 0.4 ? 0.4 : (intensity > 0.1 ? 0.1 : 0.05)));
-
-    gl_Position = projectionMatrix * view * model * pos;
-    vertexColor = color * intensity;
-    vertexTexcoords = texcoords;
+    float t = sin(fsTime * 5.0) * 0.5 + 0.5;
+    vec3 baseColor = vec3(0.5, 0.1, 0.0);
+    vec3 color = mix(baseColor, fsSilhouetteColor, t);
+    FragColor = vec4(color, 1.0f);
 }
 """
 
 
 fragment_shader = """
-#version 450
+#version 460
 layout (location = 0) out vec4 fragColor;
 
 in vec3 outColor;
@@ -98,3 +93,4 @@ void main()
     fragColor = vec4(outColor, 1) * texture(tex, outTexCoords);
 }
 """
+

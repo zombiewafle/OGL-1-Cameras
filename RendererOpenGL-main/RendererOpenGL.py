@@ -4,6 +4,7 @@ import numpy as np
 from gl import Renderer, Model
 import shaders
 from OpenGL.GLU import *
+from pygame.math import Vector2
 
 
 width = 960
@@ -12,6 +13,8 @@ height = 540
 deltaTime = 0.0
 
 act_shader = 0
+maxZoom = 3
+actualZoom = 0
 
 
 pygame.init()
@@ -25,6 +28,8 @@ face = Model('model.obj', 'model.bmp')
 face.position.z = -5
 
 rend.scene.append( face )
+
+camPos = Vector2(rend.camPosition[0],rend.camPosition[2])
 
 eyeX = rend.camPosition.x 
 eyeY = rend.camPosition.y 
@@ -51,7 +56,9 @@ while isRunning:
         #eyeY += step * deltaTime
 
     if keys[K_s]:
-        rend.camPosition.z -= 1 * deltaTime
+        if actualZoom > -maxZoom: 
+            rend.camPosition.z -= 1 * deltaTime
+            actualZoom -= 1 * deltaTime
         #eyeY -= step * deltaTime
 
     if keys[K_q]:
@@ -109,9 +116,9 @@ while isRunning:
                     if act_shader == 0:
                         rend.setShaders(shaders.vertex_shader, shaders.fragment_shader)
                     elif act_shader == 1:
-                        rend.setShaders(shaders.toon_shader, shaders.fragment_shader)
-                    
-            
+                        rend.setShaders(shaders.toon_shader_Vertex, shaders.toon_shader_fragment)
+                    #elif act_shader == 2:
+                    #   rend.setShaders(shaders.vertex_shader, shaders.fragment_static_shader)
             
 
             #if ev.key == K_4:
